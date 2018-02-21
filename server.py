@@ -23,7 +23,7 @@ state = True
 width = 400
 height = 300
 
-global p
+
 #player[active, position[x,y], velocity[x,y], keys[left, right, up, down], score]
 p = []
 
@@ -37,42 +37,71 @@ speed = math.ceil(size/4)
 
 drag = 0.2
 
-def addP(id=-1):
-    if (id <= -1):
-        p[len(p)] = {
-            "a":True,
-            "p":[10, 10],
-            "v":[0, 0],
-            "k":[False, False, False, False],
-            "s":0
-        }
-    else:
-        p[id]["a"] = True
+class Host(threading.Thread):
+    def __init__(self, s):
+        super(Host, self).__init__()
+        self.s = s
+
+    def run(self):
+        while True:
+            conn, address = self.s.accept()
+#            if (id <= -1):
+            p[len(p)] = Player(conn)
+            p[len(p) - 1].daemon = True
+            p[len(p) - 1].start()
+#            else:
+#                p[id].act = True
+#                p[id].start()
 
 
-class eventL(threading.Thread):
+class Player(threading.Thread):
     def __init__(self, conn):
-        super(eventL, self).__init__()
+        super(Player, self).__init__()
         self.conn = conn
         self.data = ""
 
+        self.act = True
+        self.pos = [10, 10]
+        self.vel = [0, 0]
+        self.col = (255, 255, 255)
+        self.key = [False, False, False, False]
+        self.sco = 0
+
         def run(self):
             while True:
-                self.data = self.data + self.conn.recv(1024).decode()
+                try:
+                    self.data = self.conn.recv(1024).decode()
 
-                buf = self.data.split() ##on white space
+                    rec = []
+                    for i in self.data.split("|")[-2]:
+                        buf = i.split(":")
+                        rec = []
+                        rec[buf[0]] = buf[1:-1]
 
-                if len(buf) > 0:
-                        p[id]["k"][data[2]] = data[3]
+                    if rec[0]["com"] == "keys":
+                        self.key = int(rec["key"])
+                    if rec[0]["com"] == "exit":
+                        close(self)
+                        break
 
-                if self.data.endswith(u"\r\n"):
-                    print(self.data)
-                    self.data = ""
+                except socket.error as e:
+#                    if e.errno == errno.ECONNRESET:
+                    close(self)
+                    break
+                else:
+                    raise()
 
         def send_msg(self, msg):
-            self.conn.send(msg)
+            try:
+                self.conn.send(msg)
+            except socket.error as e:
+#                if e.errno == errno.ECONNRESET:
+                close(self)
+            else:
+                raise ()
 
         def close(self):
+            self.act = False
             self.conn.close()
 
 def init():
@@ -80,19 +109,20 @@ def init():
     serversocket.bind(('localhost', 8089))
     serversocket.listen(5)  # become a server socket, maximum 5 connections
 
-
-
-
-
-
-    conn, address = s.accept()
-    c = eventL(conn)
-    c.start()
-
+    host = Host(serversocket)
+    host.daemon = True
+    host.start()
 
 def loop():
-    connection, address = serversocket.accept()
-    event()
+    global now
+    global wait
+    global lastCheck
+
+    now = time.time()
+    wait = (lastCheck + gap) - now
+    lastCheck = now
+    if wait > 0:
+        time.sleep(wait)
 
     for player in p:
         player["v"][0]*=drag
@@ -136,4 +166,4 @@ if __name__ == '__main__':
     init()
     while True:
         loop()
-    c.close()
+
