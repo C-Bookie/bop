@@ -1,5 +1,6 @@
 
-import pygame, sys
+import pygame
+import sys
 from pygame.locals import *
 
 playerKeys = [
@@ -9,10 +10,12 @@ playerKeys = [
 
 class Screen:
 
-    def __init__(self, game):
+    def __init__(self, game, width, height):
         self.game = game
+        self.width = width
+        self.height = height
         pygame.init()
-        self.surface = pygame.display.set_mode((game.width, game.height), 0, 32)
+        self.surface = pygame.display.set_mode((width, height), 0, 32)
         pygame.display.set_caption("bop")
         pygame.font.init()
         self.font = pygame.font.SysFont('Comic Sans MS', 30)
@@ -24,11 +27,19 @@ class Screen:
         for i in self.game.players:
             player = self.game.players[i]
             textsurface = self.font.render(str(player.sco), False, player.col)
-            self.surface.blit(textsurface, (10, i*30+10))
-            pygame.draw.rect(self.surface, player.col, (player.pos[0], player.pos[1], self.game.size, self.game.size))
+            self.surface.blit(textsurface, (10, i*35+5))
+            if len(self.game.screenSize) == 1:
+                pygame.draw.rect(self.surface, player.col, (player.pos[0], 0, self.game.size, self.height))
+            else:
+                pygame.draw.rect(self.surface, player.col, (player.pos[0], player.pos[1], self.game.size, self.game.size))
             for j, k in enumerate(playerKeys[i%len(playerKeys)]):
+                if j >= len(player.act):
+                    break
                 player.act[j] = keys[k]
-        pygame.draw.rect(self.surface, self.game.gold.col, (self.game.gold.pos[0], self.game.gold.pos[1], self.game.size, self.game.size))
+        if len(self.game.screenSize) == 1:
+            pygame.draw.rect(self.surface, self.game.gold.col, (self.game.gold.pos[0], 0, self.game.size, self.height))
+        else:
+            pygame.draw.rect(self.surface, self.game.gold.col, (self.game.gold.pos[0], self.game.gold.pos[1], self.game.size, self.game.size))
 
         for event in pygame.event.get():
             if event.type == QUIT:
