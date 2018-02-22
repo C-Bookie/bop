@@ -19,6 +19,7 @@ class Screen:
         pygame.display.set_caption("bop")
         pygame.font.init()
         self.font = pygame.font.SysFont('Comic Sans MS', 30)
+#        pygame.mixer.music.load('bop.mp3')
 
     def loop(self):
         keys = pygame.key.get_pressed()
@@ -40,6 +41,10 @@ class Screen:
             pygame.draw.rect(self.surface, self.game.gold.col, (self.game.gold.pos[0], 0, self.game.size, self.height))
         else:
             pygame.draw.rect(self.surface, self.game.gold.col, (self.game.gold.pos[0], self.game.gold.pos[1], self.game.size, self.game.size))
+
+        if self.game.bop:
+#            pygame.mixer.music.play(0)
+            self.game.bop = False
 
         for event in pygame.event.get():
             if event.type == QUIT:

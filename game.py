@@ -8,6 +8,7 @@ class Game:
         self.drag = drag
         self.size= size
         self.speed = speed
+        self.bop = False
         self.players = {}
         self.gold = self.Entity(self)
 
@@ -39,6 +40,7 @@ class Game:
                 for i, j in enumerate(self.gold.pos):
                     self.gold.pos[i] = random.randint(0, self.screenSize[i] - self.size)
                 player.sco += 1
+                self.bop = True
 
     def overlapping(self, e1, e2):
         result = True
