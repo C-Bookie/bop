@@ -15,8 +15,9 @@ drag = 0.4578
 size = 10
 
 if __name__ == '__main__':
-    game = game.Game(width, height, drag, size, math.ceil(size / 4))
-    screen = screen.Screen(game)
+    game = game.Game([width, height], drag, size, math.ceil(size / 4))
+#    game = game.Game([width], drag, size, math.ceil(size / 4))
+    screen = screen.Screen(game, width, height)
 
     game.addPlayer()
     game.addPlayer()
