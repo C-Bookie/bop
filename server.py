@@ -1,179 +1,164 @@
 import socket
 import threading
 import sys
-
-import time
 import math
+import time
 import random
+
+import game
 
 
 global serversocket
 
-fps = 60
-gap = 1/fps
-lastCheck = 0
-
-cycle = 0
-
-change = 3
-changeCycle = fps * change
-
-state = True
-
 width = 400
 height = 300
 
+fps = 60
+gap = 1 / fps
 
-#player[active, position[x,y], velocity[x,y], keys[left, right, up, down], score]
-p = {}
-
-gx = 50
-gy = 50
-
-s = [0, 0]
-
+drag = 0.4578
 size = 10
-speed = math.ceil(size/4)
-
-drag = 0.2
 
 
+class Game:
+    def __init__(self, screenSize, drag, size, speed):
+        self.screenSize = screenSize
+        self.drag = drag
+        self.size= size
+        self.speed = speed
+        self.bop = False
+        self.players = {}
+        self.gold = self.Entity(self)
 
-class Player(threading.Thread):
-    def __init__(self, conn):
-        super(Player, self).__init__()
-        self.conn = conn
-        self.data = ""
+    def addPlayer(self):
+        self.players[len(self.players)] = self.Player(self)
 
-        self.act = True
-        self.pos = [10, 10]
-        self.vel = [0, 0]
-        self.col = (255, 255, 255)
-        self.key = [False, False, False, False]
-        self.sco = 0
 
-    def run(self):
-        print("moo")
-        while True:
-            try:
-                self.data = self.conn.recv(1024).decode()
-                if self.data != "":
+    def loop(self):
+        for i in self.players:
+            player = self.players[i]
+            for j, k in enumerate(player.pos):
+                player.vel[j] *= self.drag
 
-                    rec = {}
-                    raw = self.data.split("|")[:-1]
-                    for i in raw:
-                        buf = i.split(":")
-                        rec[buf[0]] = buf[1:]
+                if player.act[j*2]:
+                    player.vel[j] -= self.speed
+                if player.act[j*2+1]:
+                    player.vel[j] += self.speed
 
-                    if rec["com"][0] == "keys":
-                        for i, j in enumerate(rec["key"]):
-                            self.key[i] = j=="True"
-                        print(self.key)
-                    elif rec["com"][0] == "exit":
-                        #                    close(self)
-                        break
+                player.pos[j] += player.vel[j]
 
-            except socket.error as e:
+                if player.pos[j] < 0:
+                    player.pos[j] = 0
+                    player.vel[j] = abs(player.vel[j])
+                if player.pos[j] > self.screenSize[j] - self.size:
+                    player.pos[j] = self.screenSize[j] - self.size
+                    player.vel[j] = -abs(player.vel[j])
+
+            if self.overlapping(player, self.gold):
+                for i, j in enumerate(self.gold.pos):
+                    self.gold.pos[i] = random.randint(0, self.screenSize[i] - self.size)
+                player.sco += 1
+                self.bop = True
+
+    def overlapping(self, e1, e2):
+        result = True
+        for i, j in enumerate(e1.pos):
+            result &= e1.pos[i] + self.size > e2.pos[i] and e1.pos[i] < e2.pos[i] + self.size
+        return result
+
+    class Entity():
+        def __init__(self, game):
+            self.pos = [0]*len(game.screenSize)
+            self.vel = [0]*len(game.screenSize)
+            for i, j in enumerate(game.screenSize):
+                self.pos[i] = random.randint(0, game.screenSize[i] - game.size)
+            self.col = (random.randint(128, 192), random.randint(128, 192), random.randint(0, 128))
+
+    class Player(Entity):
+        def __init__(self, game):
+            super(Game.Player, self).__init__(game)
+            self.act = [False]*len(game.screenSize)*2 #left, right, up, down
+            self.sco = 0
+            self.col = (random.randint(128, 255), random.randint(128, 255), random.randint(128, 255))
+
+    class RealPlayer(Player, threading.Thread):
+        def __init__(self, game, conn):
+            super(Game.RealPlayer, self).__init__(game)
+            self.conn = conn
+            self.data = ""
+
+            self.daemon = True
+            self.start()
+
+        def run(self):
+            while True:
+                try:
+                    self.data = self.conn.recv(1024).decode()
+                    if self.data != "":
+
+                        rec = {}
+                        raw = self.data.split("|")[:-1]
+                        for i in raw:
+                            buf = i.split(":")
+                            rec[buf[0]] = buf[1:]
+
+                        if rec["com"][0] == "keys":
+                            for i, j in enumerate(rec["key"]):
+                                self.act[i] = j=="True"
+                            print(self.act)
+                        elif rec["com"][0] == "exit":
+                            self.conn.close()
+                            break
+
+                except socket.error as e:
 #                    if e.errno == errno.ECONNRESET:
-#                close(self)
-                break
-            except Exception as e:
-                raise (e)
+                    self.conn.close()
+                    break
+                except Exception as e:
+                    raise (e)
 
-    def send_msg(self, msg):
-        try:
-            self.conn.send(msg)
-        except socket.error as e:
-            print("error")
-#                if e.errno == errno.ECONNRESET:
-#            close(self)
-        else:
-            raise ()
+        def send_msg(self, msg):
+            try:
+                self.conn.send(msg)
+            except socket.error as e:
+                print("error")
+    #                if e.errno == errno.ECONNRESET:
+                self.conn.close()
 
-    def close(self):
-        self.act = False
-        self.conn.close()
 
 
 class Host(threading.Thread):
-    def __init__(self, s):
+    def __init__(self, s, game):
         super(Host, self).__init__()
         self.s = s
+        self.game = game
 
     def run(self):
         while True:
             conn, address = self.s.accept()
-#            if (id <= -1):
-            p[len(p)] = Player(conn)
-            p[len(p) - 1].daemon = True
-            p[len(p) - 1].start()
-#            else:
-#                p[id].act = True
-#                p[id].start()
+            self.game.players[len(self.game.players)] = self.game.RealPlayer(game, conn)
 
-def init():
+
+if __name__ == '__main__':
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     serversocket.bind(('localhost', 8089))
     serversocket.listen(5)  # become a server socket, maximum 5 connections
 
-    host = Host(serversocket)
+    game = Game([width, height], drag, size, math.ceil(size / 4))
+
+    host = Host(serversocket, game)
     host.daemon = True
     host.start()
 
-def loop():
-    global now
-    global wait
-    global lastCheck
+    lastCheck = 0
 
-    now = time.time()
-    wait = (lastCheck + gap) - now
-    lastCheck = now
-    if wait > 0:
-        time.sleep(wait)
-
-    for i in p:
-        player = p[i]
-        player.vel[0]*=drag
-        player.vel[1]*=drag
-
-
-        if player.key[0]:
-            player.vel[0] -= speed
-        if player.key[1]:
-            player.vel[0] += speed
-        if player.key[2]:
-            player.vel[1] -= speed
-        if player.key[3]:
-            player.vel[1] += speed
-
-        player.pos[0] += player.vel[0]
-        player.pos[1] += player.vel[1]
-
-        if  player.pos[0] < 0:
-            player.pos[0] = 0
-            player.vel[0] = abs(player.vel[0])
-        if player.pos[0] > width - size:
-            player.pos[0] = width - size
-            player.vel[0] = -abs(player.vel[0])
-        if player.pos[1] < 0:
-            player.pos[1] = 0
-            player.vel[1] = abs(player.vel[1])
-        if player.pos[1] > height - size:
-            player.pos[1] = height - size
-            player.vel[1] = -abs(player.vel[1])
-
-        global gx
-        global gy
-        if player.pos[0]+size > gx and player.pos[0] < gx+size and player.pos[1]+size > gy and player.pos[1] < gy+size:
-            gx = random.randint(0, width - size)
-            gy = random.randint(0, height - size)
-            player.sco += 1
-            print(str(p[0].sco)+":"+str(p[1].sco))
-
-
-
-if __name__ == '__main__':
-    init()
     while True:
-        loop()
+        game.loop()
+
+        now = time.time()
+        wait = (lastCheck + gap) - now
+        lastCheck = now
+        if wait > 0:
+            time.sleep(wait)
+
 
