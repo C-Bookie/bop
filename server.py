@@ -25,7 +25,7 @@ height = 300
 
 
 #player[active, position[x,y], velocity[x,y], keys[left, right, up, down], score]
-p = []
+p = {}
 
 gx = 50
 gy = 50
@@ -36,6 +36,64 @@ size = 10
 speed = math.ceil(size/4)
 
 drag = 0.2
+
+
+
+class Player(threading.Thread):
+    def __init__(self, conn):
+        super(Player, self).__init__()
+        self.conn = conn
+        self.data = ""
+
+        self.act = True
+        self.pos = [10, 10]
+        self.vel = [0, 0]
+        self.col = (255, 255, 255)
+        self.key = [False, False, False, False]
+        self.sco = 0
+
+    def run(self):
+        print("moo")
+        while True:
+            try:
+                self.data = self.conn.recv(1024).decode()
+                if self.data != "":
+
+                    rec = {}
+                    raw = self.data.split("|")[:-1]
+                    for i in raw:
+                        buf = i.split(":")
+                        rec[buf[0]] = buf[1:]
+
+                    if rec["com"][0] == "keys":
+                        for i, j in enumerate(rec["key"]):
+                            self.key[i] = j=="True"
+                        print(self.key)
+                    elif rec["com"][0] == "exit":
+                        #                    close(self)
+                        break
+
+            except socket.error as e:
+#                    if e.errno == errno.ECONNRESET:
+#                close(self)
+                break
+            except Exception as e:
+                raise (e)
+
+    def send_msg(self, msg):
+        try:
+            self.conn.send(msg)
+        except socket.error as e:
+            print("error")
+#                if e.errno == errno.ECONNRESET:
+#            close(self)
+        else:
+            raise ()
+
+    def close(self):
+        self.act = False
+        self.conn.close()
+
 
 class Host(threading.Thread):
     def __init__(self, s):
@@ -52,57 +110,6 @@ class Host(threading.Thread):
 #            else:
 #                p[id].act = True
 #                p[id].start()
-
-
-class Player(threading.Thread):
-    def __init__(self, conn):
-        super(Player, self).__init__()
-        self.conn = conn
-        self.data = ""
-
-        self.act = True
-        self.pos = [10, 10]
-        self.vel = [0, 0]
-        self.col = (255, 255, 255)
-        self.key = [False, False, False, False]
-        self.sco = 0
-
-        def run(self):
-            while True:
-                try:
-                    self.data = self.conn.recv(1024).decode()
-
-                    rec = []
-                    for i in self.data.split("|")[-2]:
-                        buf = i.split(":")
-                        rec = []
-                        rec[buf[0]] = buf[1:-1]
-
-                    if rec[0]["com"] == "keys":
-                        self.key = int(rec["key"])
-                    if rec[0]["com"] == "exit":
-                        close(self)
-                        break
-
-                except socket.error as e:
-#                    if e.errno == errno.ECONNRESET:
-                    close(self)
-                    break
-                else:
-                    raise()
-
-        def send_msg(self, msg):
-            try:
-                self.conn.send(msg)
-            except socket.error as e:
-#                if e.errno == errno.ECONNRESET:
-                close(self)
-            else:
-                raise ()
-
-        def close(self):
-            self.act = False
-            self.conn.close()
 
 def init():
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -124,41 +131,44 @@ def loop():
     if wait > 0:
         time.sleep(wait)
 
-    for player in p:
-        player["v"][0]*=drag
-        player["v"][1]*=drag
+    for i in p:
+        player = p[i]
+        player.vel[0]*=drag
+        player.vel[1]*=drag
 
 
-        if player["k"][0]:
-            player["v"][0] -= speed
-        if player["k"][1]:
-            player["v"][0] += speed
-        if player["k"][2]:
-            player["v"][1] -= speed
-        if player["k"][3]:
-            player["v"][1] += speed
+        if player.key[0]:
+            player.vel[0] -= speed
+        if player.key[1]:
+            player.vel[0] += speed
+        if player.key[2]:
+            player.vel[1] -= speed
+        if player.key[3]:
+            player.vel[1] += speed
 
-        player["p"][0] += player["v"][0]
-        player["p"][1] += player["v"][1]
+        player.pos[0] += player.vel[0]
+        player.pos[1] += player.vel[1]
 
-        if  player["p"][0] < 0:
-            player["p"][0] = 0
-            player["v"][0] = abs(player["v"][0])
-        if player["p"][0] > width - size:
-            player["p"][0] = width - size
-            player["v"][0] = -abs(player["v"][0])
-        if player["p"][1] < 0:
-            player["p"][1] = 0
-            player["v"][1] = abs(player["v"][1])
-        if player["p"][1] > height - size:
-            player["p"][1] = height - size
-            player["v"][1] = -abs(player["v"][1])
+        if  player.pos[0] < 0:
+            player.pos[0] = 0
+            player.vel[0] = abs(player.vel[0])
+        if player.pos[0] > width - size:
+            player.pos[0] = width - size
+            player.vel[0] = -abs(player.vel[0])
+        if player.pos[1] < 0:
+            player.pos[1] = 0
+            player.vel[1] = abs(player.vel[1])
+        if player.pos[1] > height - size:
+            player.pos[1] = height - size
+            player.vel[1] = -abs(player.vel[1])
 
-        if player["p"][0]+size > gx and player["p"][0] < gx+size and player["p"][1]+size > gy and player["p"][1] < gy+size:
+        global gx
+        global gy
+        if player.pos[0]+size > gx and player.pos[0] < gx+size and player.pos[1]+size > gy and player.pos[1] < gy+size:
             gx = random.randint(0, width - size)
             gy = random.randint(0, height - size)
-            player["s"] += 1
-            print(str(p[0]["s"])+":"+str(p[1]["s"]))
+            player.sco += 1
+            print(str(p[0].sco)+":"+str(p[1].sco))
 
 
 

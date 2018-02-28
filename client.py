@@ -51,6 +51,7 @@ class Player(threading.Thread):
             self.conn.close()
 
 def init():
+    global clientsocket
     clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     clientsocket.connect(('localhost', 8089))
 
@@ -65,7 +66,20 @@ def loop():
     if wait > 0:
         time.sleep(wait)
 
-    clientsocket.send(({"moo", 1}).encode())
+    temp = {
+        "com":["keys"],
+        "key":[True, False, False, False]
+    }
+    data = ""
+    for i in temp:
+        data += str(i)
+        for j in temp[i]:
+            data += ":"
+            data += str(j)
+        data += "|"
+    print(data)
+    global clientsocket
+    clientsocket.send(data.encode())
 
 #    keys = pygame.key.get_pressed()
 #    if keys[K_a]:
@@ -74,5 +88,7 @@ def loop():
 
 if __name__ == '__main__':
     init()
-    while 1:
+    l = True
+    while l:
+        l = False
         loop()
