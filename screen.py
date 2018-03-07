@@ -10,27 +10,29 @@ playerKeys = [
 
 class Screen:
 
-    def __init__(self, game, width, height):
+    def __init__(self, game):
         self.game = game
-        self.width = width
-        self.height = height
         pygame.init()
-        self.surface = pygame.display.set_mode((width, height), 0, 32)
+        if len(self.game.screenSize) == 1:
+            self.surface = pygame.display.set_mode((game.screenSize[0], 300), 0, 32)
+        else:
+            self.surface = pygame.display.set_mode((game.screenSize[0], game.screenSize[1]), 0, 32)
         pygame.display.set_caption("bop")
         pygame.font.init()
         self.font = pygame.font.SysFont('Comic Sans MS', 30)
-#        pygame.mixer.music.load('bop.mp3')
+
+#        pygame.mixer.music.load('bop.wav')
 
     def loop(self):
         keys = pygame.key.get_pressed()
         self.surface.fill((32, 32, 32))
 
-        for i in self.game.players:
-            player = self.game.players[i]
+        for i in self.game.data["players"]:
+            player = self.game.data["players"][i]
             textsurface = self.font.render(str(player.sco), False, player.col)
             self.surface.blit(textsurface, (10, i*35+5))
             if len(self.game.screenSize) == 1:
-                pygame.draw.rect(self.surface, player.col, (player.pos[0], 0, self.game.size, self.height))
+                pygame.draw.rect(self.surface, player.col, (player.pos[0], 0, self.game.size, self.game.screenSize[1]))
             else:
                 pygame.draw.rect(self.surface, player.col, (player.pos[0], player.pos[1], self.game.size, self.game.size))
             for j, k in enumerate(playerKeys[i%len(playerKeys)]):
@@ -38,9 +40,9 @@ class Screen:
                     break
                 player.act[j] = keys[k]
         if len(self.game.screenSize) == 1:
-            pygame.draw.rect(self.surface, self.game.gold.col, (self.game.gold.pos[0], 0, self.game.size, self.height))
+            pygame.draw.rect(self.surface, self.game.data["gold"].col, (self.game.data["gold"].pos[0], 0, self.game.size, self.game.screenSize[1]))
         else:
-            pygame.draw.rect(self.surface, self.game.gold.col, (self.game.gold.pos[0], self.game.gold.pos[1], self.game.size, self.game.size))
+            pygame.draw.rect(self.surface, self.game.data["gold"].col, (self.game.data["gold"].pos[0], self.game.data["gold"].pos[1], self.game.size, self.game.size))
 
         if self.game.bop:
 #            pygame.mixer.music.play(0)

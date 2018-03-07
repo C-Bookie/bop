@@ -3,22 +3,25 @@ import math
 import random
 
 class Game:
-    def __init__(self, screenSize, drag, size, speed):
+    def __init__(self, screenSize, drag, size, speed, frame=False):
         self.screenSize = screenSize
         self.drag = drag
         self.size= size
         self.speed = speed
         self.bop = False
-        self.players = {}
-        self.gold = self.Entity(self)
+        self.data = {
+            "players":{},
+            "gold":self.Entity(self)
+        }
+        self.frame = frame
 
     def addPlayer(self):
-        self.players[len(self.players)] = self.Player(self)
+        self.data["players"][len(self.data["players"])] = self.Player(self)
 
 
     def loop(self):
-        for i in self.players:
-            player = self.players[i]
+        for i in self.data["players"]:
+            player = self.data["players"][i]
             for j, k in enumerate(player.pos):
                 player.vel[j] *= self.drag
 
@@ -36,11 +39,12 @@ class Game:
                     player.pos[j] = self.screenSize[j] - self.size
                     player.vel[j] = -abs(player.vel[j])
 
-            if self.overlapping(player, self.gold):
-                for i, j in enumerate(self.gold.pos):
-                    self.gold.pos[i] = random.randint(0, self.screenSize[i] - self.size)
-                player.sco += 1
-                self.bop = True
+            if not self.frame:
+                if self.overlapping(player, self.data["gold"]):
+                    for i, j in enumerate(self.data["gold"].pos):
+                        self.data["gold"].pos[i] = random.randint(0, self.screenSize[i] - self.size)
+                    player.sco += 1
+                    self.bop = True
 
     def overlapping(self, e1, e2):
         result = True
