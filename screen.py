@@ -22,6 +22,10 @@ class Screen:
         pygame.font.init()
         self.font = pygame.font.SysFont('Comic Sans MS', 30)
 
+        self.joyStick = True
+        self.joystickO = pygame.joystick.Joystick(0)
+        self.joystickO.init()
+
 #        pygame.mixer.music.load('bop.wav')
 
     def loop(self):
@@ -39,10 +43,15 @@ class Screen:
             else:
                 pygame.draw.rect(self.surface, player.col, (player.pos[0], player.pos[1], self.game.size, self.game.size))
             if i in self.users:
-                for j, k in enumerate(playerKeys[l%len(playerKeys)]):
-                    if j >= len(player.act):
-                        break
-                    player.act[j] = keys[k]
+                if self.joyStick:
+                    player.act[0] = self.joystickO.get_axis(0)
+                    player.act[2] = self.joystickO.get_axis(1)
+                else:
+                    for j, k in enumerate(playerKeys[l%len(playerKeys)]):
+                        if j >= len(player.act):
+                            break
+                        player.act[j] = 1*keys[k]
+
                 l+=1
         if len(self.game.screenSize) == 1:
             pygame.draw.rect(self.surface, self.game.data["gold"].col, (self.game.data["gold"].pos[0], 0, self.game.size, self.game.screenSize[1]))

@@ -25,10 +25,8 @@ class Game:
             for j, k in enumerate(player.pos):
                 player.vel[j] *= self.drag
 
-                if player.act[j*2]:
-                    player.vel[j] -= self.speed
-                if player.act[j*2+1]:
-                    player.vel[j] += self.speed
+                player.vel[j] -= self.speed*player.act[j*2]
+                player.vel[j] += self.speed*player.act[j*2+1]
 
                 player.pos[j] += player.vel[j]
 
