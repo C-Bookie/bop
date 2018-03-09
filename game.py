@@ -54,12 +54,24 @@ class Game:
 
     class Entity():
         def __init__(self, game):
+            self.game = game
             self.pos = [0]*len(game.screenSize)
             self.vel = [0]*len(game.screenSize)
             for i, j in enumerate(game.screenSize):
                 self.pos[i] = random.randint(0, game.screenSize[i] - game.size)
             self.col = (random.randint(128, 192), random.randint(128, 192), random.randint(0, 128))
 
+        def list(self):
+            return {
+                "pos": self.pos,
+                "vel": self.vel,
+                "col": self.col,
+            }
+
+        def deList(self, l):
+            self.pos = l["pos"]
+            self.vel = l["vel"]
+            self.col = l["col"]
 
     class Player(Entity):
         def __init__(self, game):
@@ -67,4 +79,17 @@ class Game:
             self.act = [False]*len(game.screenSize)*2 #left, right, up, down
             self.sco = 0
             self.col = (random.randint(128, 255), random.randint(128, 255), random.randint(128, 255))
+
+        def list(self):
+            result = super(Game.Player, self).list()
+            result.update({
+                "act": self.act,
+                "sco": self.sco
+            })
+            return result
+
+        def deList(self, l):
+            super(Game.Player, self).deList(l)
+            self.act = l["act"]
+            self.sco = l["sco"]
 

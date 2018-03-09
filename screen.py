@@ -10,8 +10,9 @@ playerKeys = [
 
 class Screen:
 
-    def __init__(self, game):
+    def __init__(self, game, users):
         self.game = game
+        self.users = users
         pygame.init()
         if len(self.game.screenSize) == 1:
             self.surface = pygame.display.set_mode((game.screenSize[0], 300), 0, 32)
@@ -27,18 +28,22 @@ class Screen:
         keys = pygame.key.get_pressed()
         self.surface.fill((32, 32, 32))
 
-        for i in self.game.data["players"]:
-            player = self.game.data["players"][i]
+        l = 0
+        tempData = self.game.data
+        for i in tempData["players"]:
+            player = tempData["players"][i]
             textsurface = self.font.render(str(player.sco), False, player.col)
             self.surface.blit(textsurface, (10, i*35+5))
             if len(self.game.screenSize) == 1:
                 pygame.draw.rect(self.surface, player.col, (player.pos[0], 0, self.game.size, self.game.screenSize[1]))
             else:
                 pygame.draw.rect(self.surface, player.col, (player.pos[0], player.pos[1], self.game.size, self.game.size))
-            for j, k in enumerate(playerKeys[i%len(playerKeys)]):
-                if j >= len(player.act):
-                    break
-                player.act[j] = keys[k]
+            if i in self.users:
+                for j, k in enumerate(playerKeys[l%len(playerKeys)]):
+                    if j >= len(player.act):
+                        break
+                    player.act[j] = keys[k]
+                l+=1
         if len(self.game.screenSize) == 1:
             pygame.draw.rect(self.surface, self.game.data["gold"].col, (self.game.data["gold"].pos[0], 0, self.game.size, self.game.screenSize[1]))
         else:
