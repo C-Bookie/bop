@@ -1,20 +1,16 @@
 import socket
 import threading
-
 import math
 import time
-
 import struct
-
-global clientsocket
-
-import pygame
-import sys
-from pygame.locals import *
-
 import json
 
+from pygame.locals import *
+
 import game, screen
+
+
+global clientsocket
 
 playerKeys = [
     (K_a, K_d, K_w, K_s),

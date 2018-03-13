@@ -1,15 +1,11 @@
 import socket
 import threading
-import sys
 import math
 import time
-import random
-
 import struct
+import json
 
 import game
-
-import json
 
 
 global serversocket

@@ -1,5 +1,4 @@
 
-import math
 import random
 
 class Game:
@@ -25,8 +24,8 @@ class Game:
             for j, k in enumerate(player.pos):
                 player.vel[j] *= self.drag
 
-                player.vel[j] -= self.speed*player.act[j*2]
-                player.vel[j] += self.speed*player.act[j*2+1]
+                player.vel[j] += self.speed*player.act[j*2]
+                player.vel[j] -= self.speed*player.act[j*2+1]
 
                 player.pos[j] += player.vel[j]
 
@@ -74,7 +73,7 @@ class Game:
     class Player(Entity):
         def __init__(self, game):
             super(Game.Player, self).__init__(game)
-            self.act = [False]*len(game.screenSize)*2 #left, right, up, down
+            self.act = [0]*len(game.screenSize)*2 #left, right, up, down
             self.sco = 0
             self.col = (random.randint(128, 255), random.randint(128, 255), random.randint(128, 255))
 
