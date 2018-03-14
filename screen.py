@@ -23,9 +23,10 @@ class Screen:
         pygame.font.init()
         self.font = pygame.font.SysFont('Comic Sans MS', 30)
 
-        self.joyStick = True
-        self.joystickO = pygame.joystick.Joystick(0)
-        self.joystickO.init()
+        self.joyStick = False
+        if self.joyStick:
+            self.joystickO = pygame.joystick.Joystick(0)
+            self.joystickO.init()
 
 #        pygame.mixer.music.load('bop.wav')
 

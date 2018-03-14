@@ -5,6 +5,8 @@ import time
 import game, screen
 import client, server
 
+import threading
+
 hosting = True
 headless = False
 Bot = False
@@ -27,11 +29,49 @@ def question(msg):
         if result == "y" or result == "n":
             return result == "y"
 
+
+##test begin
+
+class A():
+    def __init__(self, n):
+        self.n = n
+
+class Class1(threading.Thread):
+    def __init__(self, a):
+        threading.Thread.__init__(self)
+        self.a = a
+
+    def run(self):
+        self.a.n = 1
+
+class Class2(threading.Thread):
+    def __init__(self, a):
+        threading.Thread.__init__(self)
+        self.a = a
+
+    def run(self):
+        self.a.n = 2
+
+
 if __name__ == '__main__':
+
+    a = A(0)
+
+    class1 = Class1(a)
+    class1.deamon = True
+    class1.run()
+
+    class2 = Class2(a)
+    class2.deamon = True
+    class2.run()
+
+    raise Exception(str(a.n))
+
+##test end
 
     print("///Bop\\\\\\")
 
-    hosting = input("Hosting?")
+    hosting = question("Hosting?")
 
     if hosting:
         headless = question("Headless?")
