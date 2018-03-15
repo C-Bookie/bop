@@ -4,10 +4,22 @@ import sys
 import pygame
 from pygame.locals import *
 
+import math
+
 playerKeys = [
     (K_a, K_d, K_w, K_s),
     (K_LEFT, K_RIGHT, K_UP, K_DOWN)
 ]
+
+deadzone = 0.1
+
+def correctJoy(n):
+    if n < deadzone and n > -deadzone:
+        return 0
+    if n < 0:
+        return -n**2
+    return n**2
+
 
 class Screen:
 
@@ -23,7 +35,7 @@ class Screen:
         pygame.font.init()
         self.font = pygame.font.SysFont('Comic Sans MS', 30)
 
-        self.joyStick = False
+        self.joyStick = True
         if self.joyStick:
             self.joystickO = pygame.joystick.Joystick(0)
             self.joystickO.init()
@@ -46,8 +58,8 @@ class Screen:
                 pygame.draw.rect(self.surface, player.col, (player.pos[0], player.pos[1], self.game.size, self.game.size))
             if i in self.users:
                 if self.joyStick:
-                    player.act[0] = self.joystickO.get_axis(0)
-                    player.act[2] = self.joystickO.get_axis(1)
+                    player.act[0] = correctJoy(self.joystickO.get_axis(0))
+                    player.act[2] = correctJoy(self.joystickO.get_axis(1))
                 else:
                     for j, k in enumerate(playerKeys[l%len(playerKeys)]):
                         if j >= len(player.act):

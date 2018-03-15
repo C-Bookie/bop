@@ -132,7 +132,7 @@ class Host(threading.Thread):
 
 
 if __name__ == '__main__':
-    game = game.Game([width, height], drag, size, math.ceil(size / 4))
+    game = game.Game([width, height], drag, size, math.ceil(size / 2**3))
 
     host = Host(game)
     host.daemon = True

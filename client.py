@@ -33,9 +33,10 @@ class Client(threading.Thread):
 
         while True:
             self.data = self.recv_msg().decode()
-            rec = json.loads(self.data)
-            if rec["com"] == "id":
-                break
+            if self.data != "":
+                rec = json.loads(self.data)
+                if rec["com"] == "id":
+                    break
         self.id = rec["id"]
         self.game.data["players"][self.id] = self.game.Player(self.game)
 
