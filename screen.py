@@ -11,7 +11,7 @@ playerKeys = [
     (K_LEFT, K_RIGHT, K_UP, K_DOWN)
 ]
 
-deadzone = 0.1
+deadzone = 0.25
 
 def correctJoy(n):
     if n < deadzone and n > -deadzone:
