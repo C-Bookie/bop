@@ -25,11 +25,11 @@ loop = True
 
 
 class Client(threading.Thread):
-    def __init__(self, game):
+    def __init__(self, game, ip):
         super(Client, self).__init__()
         self.game = game
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.conn.connect(('localhost', 8089))
+        self.conn.connect((ip, 8089))
 
         while True:
             self.data = self.recv_msg().decode()

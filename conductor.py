@@ -11,7 +11,7 @@ hosting = True
 headless = False
 Bot = False
 
-ip = "127.0.0.1"
+ip = "localhost"
 
 width = 400
 height = 300
@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
     if not headless:
         print("Client starting")
-        client = client.Client(game)
+        client = client.Client(game, ip)
         screen = screen.Screen(game, [client.id], controller)
 
         client.daemon = True
