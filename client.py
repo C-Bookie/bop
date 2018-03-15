@@ -78,13 +78,15 @@ class Client(threading.Thread):
         except socket.error as e:
             print("error")
             #                if e.errno == errno.ECONNRESET:
+            global loop
+            loop = False
             self.conn.close()
 
     def send_set(self, s):
         def set_default(obj):
             if isinstance(obj, set):
                 return list(obj)
-            elif isinstance(obj, game.Entity):
+            elif isinstance(obj, game.Game.Entity):
                 return obj.list()
             raise TypeError
 

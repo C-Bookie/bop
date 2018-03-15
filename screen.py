@@ -7,8 +7,8 @@ from pygame.locals import *
 import math
 
 playerKeys = [
-    (K_a, K_d, K_w, K_s),
-    (K_LEFT, K_RIGHT, K_UP, K_DOWN)
+    (K_d, K_a, K_s, K_w),
+    (K_RIGHT, K_LEFT, K_DOWN, K_UP)
 ]
 
 deadzone = 0.25
@@ -23,7 +23,7 @@ def correctJoy(n):
 
 class Screen:
 
-    def __init__(self, game, users):
+    def __init__(self, game, users, controller):
         self.game = game
         self.users = users
         pygame.init()
@@ -35,7 +35,7 @@ class Screen:
         pygame.font.init()
         self.font = pygame.font.SysFont('Comic Sans MS', 30)
 
-        self.joyStick = True
+        self.joyStick = controller
         if self.joyStick:
             self.joystickO = pygame.joystick.Joystick(0)
             self.joystickO.init()

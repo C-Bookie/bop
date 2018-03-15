@@ -15,9 +15,9 @@ ip = "127.0.0.1"
 
 width = 400
 height = 300
-drag = 0.5
+drag = 0.90
 size = 4
-speed = math.ceil(size / 4)
+speed = math.ceil(((1-drag)*size) / 1000)   #fixme
 
 fps = 60
 gap = 1 / fps
@@ -42,6 +42,9 @@ if __name__ == '__main__':
         headless = False
         ip = input("Address?")
 
+    if not headless:
+        controller = question("Controller?")
+
     #    bot = question("Bot?")
 
 
@@ -58,7 +61,7 @@ if __name__ == '__main__':
     if not headless:
         print("Client starting")
         client = client.Client(game)
-        screen = screen.Screen(game, [client.id])
+        screen = screen.Screen(game, [client.id], controller)
 
         client.daemon = True
         print("Client started")

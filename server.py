@@ -74,7 +74,7 @@ class RealPlayer(game.Game.Player, threading.Thread):
         def set_default(obj):
             if isinstance(obj, set):
                 return list(obj)
-            elif isinstance(obj, game.Entity):
+            elif isinstance(obj, game.Game.Entity):
                 return obj.list()
             raise TypeError
 
@@ -117,8 +117,9 @@ class Host(threading.Thread):
             newId = 0
             while newId in self.game.data["players"]:
                 newId+=1
-            self.game.data["players"][newId] = RealPlayer(game, conn, newId)
-            host.sync()
+            self.game.data["players"][newId] = RealPlayer(self.game, conn, newId)
+            print("Connected: " + str(newId))
+            self.sync()
 
     def sync(self):
         for i in list(self.game.data["players"]):
