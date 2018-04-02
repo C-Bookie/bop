@@ -23,7 +23,7 @@ def correctJoy(n):
 
 class Screen:
 
-    def __init__(self, game, users, controller):
+    def __init__(self, game, users):
         self.game = game
         self.users = users
         pygame.init()
@@ -35,12 +35,18 @@ class Screen:
         pygame.font.init()
         self.font = pygame.font.SysFont('Comic Sans MS', 30)
 
-        self.joyStick = controller
-        if self.joyStick:
-            self.joystickO = pygame.joystick.Joystick(0)
-            self.joystickO.init()
-
 #        pygame.mixer.music.load('bop.wav')
+
+    class user():
+        def __init__(self, id, controller=False, joystickID=0, controls=()):
+            self.id = id
+            self.controller = controller
+            if self.controller:
+                self.joystick = pygame.joystick.Joystick(joystickID)
+                self.joystick.init()
+            else:
+                self.controls = controls
+
 
     def loop(self):
         keys = pygame.key.get_pressed()

@@ -14,6 +14,9 @@ class Game:
         }
         self.frame = frame
 
+    def addPlayer(self, id):
+        self.data["players"][id] = self.Player(self)
+
     def addPlayer(self):
         self.data["players"][len(self.data["players"])] = self.Player(self)
 

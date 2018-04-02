@@ -11,12 +11,13 @@ height = 300
 fps = 60
 gap = 1 / fps
 
-drag = 0.4578
+drag = 1/4
 size = 10
+speed = 1/8
 
 if __name__ == '__main__':
 #    game = game.Game([width, height], drag, size, math.ceil(size / 4))
-    game = game.Game([width], drag, size, math.ceil(size / 4))
+    game = game.Game([width], drag, size, math.ceil(size * speed))
     screen = screen.Screen(game, width, height)
 
     game.addPlayer()

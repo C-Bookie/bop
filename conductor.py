@@ -2,13 +2,15 @@
 import math
 import time
 
-import game, screen
+import game, screen, director
 import client, server
 
 import threading
 
 hosting = True
 headless = False
+players = 2
+userControls = []
 Bot = False
 
 ip = "localhost"
@@ -29,9 +31,16 @@ def question(msg):
         if result == "y" or result == "n":
             return result == "y"
 
+def questionInt(msg):
+    str = msg + ": "
+    while True:
+        result = input(str)
+        try:
+            return int(result)
+        except ValueError:
+            continue
 
 if __name__ == '__main__':
-
     print("///Bop\\\\\\")
 
     hosting = question("Hosting?")
@@ -43,7 +52,18 @@ if __name__ == '__main__':
         ip = input("Address?")
 
     if not headless:
-        controller = question("Controller?")
+        players = questionInt("No. of players")
+        userControls = []
+        for i in range(players):
+            joystick = 0
+            keyControles = 0
+            controller = question("Controller for player " + str(i+1) + "?")
+            if controller:
+                userControls.append((controller, joystick))
+                joystick+=1
+            else:
+                userControls.append((controller, keyControles))
+                keyControles+=1
 
     #    bot = question("Bot?")
 
@@ -53,20 +73,18 @@ if __name__ == '__main__':
     if hosting:
         print("Server starting")
         host = server.Host(game)
-        host.daemon = True
-
-        host.start()
         print("server started")
 
     if not headless:
         print("Client starting")
+
         client = client.Client(game, ip)
-        screen = screen.Screen(game, [client.id], controller)
+        users = []
+        for i in range(players):
+            users.append(screen.Screen.user(client.id, False, controls=screen.playerKeys[0]))
+        screen = screen.Screen(game, users)
 
-        client.daemon = True
         print("Client started")
-
-        client.start()
 
     lastCheck = 0
 
