@@ -2,10 +2,8 @@
 import math
 import time
 
-import game, screen, director
+import game, director
 import server, user
-
-import threading
 
 hosting = True
 headless = False
@@ -13,7 +11,7 @@ players = 2
 userControls = []
 Bot = False
 
-ip = "localhost"
+ip = "192.168.1.147"
 
 width = 400
 height = 300

@@ -51,21 +51,19 @@ class Host(threading.Thread):
     def __init__(self, game):
         super(Host, self).__init__()
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.bind(('localhost', 8089))
+        self.s.bind(('192.168.1.147', 8089))
         self.s.listen(5)  # become a server socket, maximum 5 connections
         self.game = game
         self.connections = []
-#        self.lock = threading.Lock()
 
         self.daemon = True
         self.start()
 
-    def run(self):  #fixme
+    def run(self):
         while True:
             conn, address = self.s.accept()
             self.connections.append(ClientConnection(self.game, conn))
             print("Client connected")
-#            self.sync()
 
     def sync(self):
         for client in self.connections:

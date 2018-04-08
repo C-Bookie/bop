@@ -4,7 +4,6 @@ import sys
 import pygame
 from pygame.locals import *
 
-import math
 
 deadzone = 0.25
 
