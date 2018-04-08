@@ -31,14 +31,14 @@ class ClientConnection():
         newId = 0
         while newId in self.game.data["players"]:
             newId += 1
-        self.game.players[newId] = self.game.Player(self.game)  #fixme
+        self.game.data["players"][newId] = game.Game.Player(self.game)  #fixme
         self.connection.send_set({
             "com":"id",
             "id":newId
         })
 
     def keysCom(self, rec):
-        self.game.players[rec["id"]].act = rec["key"]
+        self.game.data["players"][rec["id"]].act = rec["key"]
 
     def exitCom(self, _rec):
         global loop
@@ -68,8 +68,8 @@ class Host(threading.Thread):
 #            self.sync()
 
     def sync(self):
-        for i in list(self.game.data["players"]):
-            self.game.data["players"][i].send_set({
+        for client in self.connections:
+            client.connection.send_set({
                 "com":"data",
                 "data":self.game.data
             })
