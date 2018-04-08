@@ -6,11 +6,6 @@ from pygame.locals import *
 
 import math
 
-playerKeys = [
-    (K_d, K_a, K_s, K_w),
-    (K_RIGHT, K_LEFT, K_DOWN, K_UP)
-]
-
 deadzone = 0.25
 
 def correctJoy(n):
@@ -22,10 +17,9 @@ def correctJoy(n):
 
 
 class Screen:
-
-    def __init__(self, game, users):
+    def __init__(self, game):
         self.game = game
-        self.users = users
+        self.users = {}
         pygame.init()
         if len(self.game.screenSize) == 1:
             self.surface = pygame.display.set_mode((game.screenSize[0], 300), 0, 32)
@@ -37,22 +31,13 @@ class Screen:
 
 #        pygame.mixer.music.load('bop.wav')
 
-    class user():
-        def __init__(self, id, controller=False, joystickID=0, controls=()):
-            self.id = id
-            self.controller = controller
-            if self.controller:
-                self.joystick = pygame.joystick.Joystick(joystickID)
-                self.joystick.init()
-            else:
-                self.controls = controls
-
+    def addUser(self, user):
+        self.users[user.id] = user
 
     def loop(self):
         keys = pygame.key.get_pressed()
         self.surface.fill((32, 32, 32))
 
-        l = 0
         tempData = self.game.data
         for i in tempData["players"]:
             player = tempData["players"][i]
@@ -62,17 +47,16 @@ class Screen:
                 pygame.draw.rect(self.surface, player.col, (player.pos[0], 0, self.game.size, self.game.screenSize[1]))
             else:
                 pygame.draw.rect(self.surface, player.col, (player.pos[0], player.pos[1], self.game.size, self.game.size))
-            if i in self.users:
-                if self.joyStick:
-                    player.act[0] = correctJoy(self.joystickO.get_axis(0))
-                    player.act[2] = correctJoy(self.joystickO.get_axis(1))
-                else:
-                    for j, k in enumerate(playerKeys[l%len(playerKeys)]):
-                        if j >= len(player.act):
-                            break
-                        player.act[j] = 1*keys[k]
 
-                l+=1
+            if i in self.users:
+                user = self.users[i]
+                if user.controller:
+                    player.act[0] = correctJoy(user.joystick.get_axis(0))
+                    player.act[2] = correctJoy(user.joystick.get_axis(1))
+                else:
+                    for key in range(len(user.controls)):
+                        player.act[key] = keys[user.controls]
+
         if len(self.game.screenSize) == 1:
             pygame.draw.rect(self.surface, self.game.data["gold"].col, (self.game.data["gold"].pos[0], 0, self.game.size, self.game.screenSize[1]))
         else:

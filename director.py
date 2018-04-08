@@ -1,34 +1,63 @@
 
-import json
+import socket
 
-import client, screen, user
+import screen, connection
 
-class director():
-    def __init__(self, ip, game=None):
-        if game == None:
-            self.game = game.Game
-        else:
-            self.game = game
-        self.client = client.Client(game, ip)
-        self.client.daemon = True
-        self.client.start()
+class Director():
+    def __init__(self, ip, game):
+        conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        conn.connect((ip, 8089))
+        self.connection = connection.Connection(conn)
 
+        self.game = game
+        self.screen = screen.Screen(self.game)
         self.users = []
-        for i in range(players):
-            pass
 
-        self.screen = screen.Screen
+        self.connection.setListener("data", self.dataCom)
+#        self.connection.setListener("exit", self.exitCom)
+        self.connection.setListener("id", self.freshID)
 
-    def newUser(self):
-        while True:
-            self.data = self.client.recv_msg().decode()  #fixme
-            if self.data != "":
-                rec = json.loads(self.data)
-                if rec["com"] == "id":
-                    break
-        self.id = rec["id"]
-        #self.game.data["players"][self.id] = self.game.Player(self.game)
-        self.client.game.addPlayer(self.id)
-        self.users.append(screen.Screen.user(id, False, controls=screen.playerKeys[0]))
+    def newUser(self, user):
+        self.users.append(user)
+        temp = {"com": "newID"}
+        self.connection.send_set(temp)
+
+    def freshID(self, rec):
+        for user in self.users:
+            if user.id == -1:
+                user.id = rec["id"]
+                self.screen.addUser(user)
+                self.game.addPlayer(user.id)
+                return
+        raise Exception
+
+    def dataCom(self, rec):
+        self.game.data["gold"].deList(rec["data"]["gold"])  #sync the gold
+
+        for j in rec["data"]["players"]:    #adding online players
+            i = int(j)
+            if i not in self.game.data["players"]:
+                self.game.data["players"][i] = self.game.Player(self.game)
+            self.game.data["players"][i].deList(rec["data"]["players"][j])
+
+        for j in list(self.game.data["players"]):   #removing online players
+            if str(j) not in rec["data"]["players"]:    #todo replace str(j) with int(j)
+                self.game.data["players"].pop(j)
+
+    def exitCom(self, _rec):
+        global loop
+        loop = False
+        self.connection.conn.close()
+
+    def loop(self):
+        self.screen.loop()
+
+        for user in self.users:
+            self.connection.send_set({
+                "com": "keys",
+                "id": user.id,
+                "key": self.game.data["players"][user.id].act
+            })
+
 
 

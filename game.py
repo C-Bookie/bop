@@ -17,10 +17,6 @@ class Game:
     def addPlayer(self, id):
         self.data["players"][id] = self.Player(self)
 
-    def addPlayer(self):
-        self.data["players"][len(self.data["players"])] = self.Player(self)
-
-
     def loop(self):
         for i in self.data["players"]:
             player = self.data["players"][i]

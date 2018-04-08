@@ -1,4 +1,6 @@
 
+#partially stolen code, can't remember where from
+
 import socket
 import threading
 import json
@@ -21,7 +23,6 @@ class Connection(threading.Thread):
             try:
                 self.data = self.recv_msg().decode()
                 if self.data != "":
-
                     rec = json.loads(self.data)
 
                     if rec["com"] in self.listeners:
@@ -30,20 +31,21 @@ class Connection(threading.Thread):
             except socket.error as e:
                 #if e.errno == errno.ECONNRESET:
                 self.conn.close()
-                break
+#                break
+                raise(e)
             except Exception as e:
-                raise (e)
+                raise(e)
 
     def send_msg(self, msg):
         try:
             msg = struct.pack('>I', len(msg)) + msg
             self.conn.sendall(msg)
         except socket.error as e:
-            print("error")
-            #                if e.errno == errno.ECONNRESET:
+            #if e.errno == errno.ECONNRESET:
             global loop
             loop = False
             self.conn.close()
+            raise(e)
 
     def send_set(self, s):
         def set_default(obj):
@@ -73,5 +75,8 @@ class Connection(threading.Thread):
                 return None
             data += packet
         return data
+
+    def close(self):
+        self.conn.close()
 
 

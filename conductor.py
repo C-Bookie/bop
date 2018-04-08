@@ -3,7 +3,7 @@ import math
 import time
 
 import game, screen, director
-import client, server
+import server, user
 
 import threading
 
@@ -32,7 +32,7 @@ def question(msg):
             return result == "y"
 
 def questionInt(msg):
-    str = msg + ": "
+    str = msg + " (Int): "
     while True:
         result = input(str)
         try:
@@ -43,6 +43,8 @@ def questionInt(msg):
 if __name__ == '__main__':
     print("///Bop\\\\\\")
 
+    ##configuration
+
     hosting = question("Hosting?")
 
     if hosting:
@@ -52,39 +54,44 @@ if __name__ == '__main__':
         ip = input("Address?")
 
     if not headless:
-        players = questionInt("No. of players")
         userControls = []
-        for i in range(players):
-            joystick = 0
-            keyControles = 0
+        joystick = 0
+        keyControls = 0
+        for i in range(questionInt("No. of players?")):
             controller = question("Controller for player " + str(i+1) + "?")
             if controller:
                 userControls.append((controller, joystick))
                 joystick+=1
             else:
-                userControls.append((controller, keyControles))
-                keyControles+=1
+                userControls.append((controller, keyControls))
+                keyControls+=1
 
-    #    bot = question("Bot?")
+    #    botCount = questionInt("No. of Bots?")
 
+    ##initialization
 
     game = game.Game([width, height], drag, size, speed, not hosting)
 
     if hosting:
         print("Server starting")
         host = server.Host(game)
-        print("server started")
+        print("Server started")
+    else:
+        host = None
 
     if not headless:
         print("Client starting")
-
-        client = client.Client(game, ip)
-        users = []
-        for i in range(players):
-            users.append(screen.Screen.user(client.id, False, controls=screen.playerKeys[0]))
-        screen = screen.Screen(game, users)
-
+        director = director.Director(ip, game)
+        for userControl in userControls:
+            if userControl[0]:
+                director.newUser(user.User(controller=True, joystickID=userControl[1]))
+            else:
+                director.newUser(user.User(controller=False, controls=user.playerKeys[userControl[1]]))
         print("Client started")
+    else:
+        director = None
+
+    ##main game loop
 
     lastCheck = 0
 
@@ -96,9 +103,7 @@ if __name__ == '__main__':
             host.sync()
 
         if not headless:
-            client.game.loop()
-            screen.loop()
-            client.sync()
+            director.loop()
 
         now = time.time()
         wait = (lastCheck + gap) - now
