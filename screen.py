@@ -54,8 +54,8 @@ class Screen:
                     player.act[0] = correctJoy(user.joystick.get_axis(0))
                     player.act[2] = correctJoy(user.joystick.get_axis(1))
                 else:
-                    for key in range(len(user.controls)):
-                        player.act[key] = 1 if keys[key] else 0
+                    for key, val in enumerate(user.controls):
+                        player.act[key] = 1 if keys[val] else 0
 
         if len(self.game.screenSize) == 1:
             pygame.draw.rect(self.surface, self.game.data["gold"].col, (self.game.data["gold"].pos[0], 0, self.game.size, self.game.screenSize[1]))
