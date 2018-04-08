@@ -53,11 +53,12 @@ class Director():
         self.screen.loop()
 
         for user in self.users:
-            self.connection.send_set({
-                "com": "keys",
-                "id": user.id,
-                "key": self.game.data["players"][user.id].act
-            })
+            if user.id != -1:
+                self.connection.send_set({
+                    "com": "keys",
+                    "id": user.id,
+                    "key": self.game.data["players"][user.id].act
+                })
 
 
 

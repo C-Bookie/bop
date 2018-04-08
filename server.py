@@ -20,7 +20,6 @@ loop = True
 class ClientConnection():
     def __init__(self, game, conn):
         self.game = game
-        self.players = {}
 
         self.connection = connection.Connection(conn)
 
@@ -32,14 +31,14 @@ class ClientConnection():
         newId = 0
         while newId in self.game.data["players"]:
             newId += 1
-        self.players[newId] = game.Game.Player(self.game)  #fixme
+        self.game.players[newId] = self.game.Player(self.game)  #fixme
         self.connection.send_set({
             "com":"id",
             "id":newId
         })
 
     def keysCom(self, rec):
-        self.players[rec["id"]].act = rec["key"]
+        self.game.players[rec["id"]].act = rec["key"]
 
     def exitCom(self, _rec):
         global loop
@@ -55,6 +54,7 @@ class Host(threading.Thread):
         self.s.bind(('localhost', 8089))
         self.s.listen(5)  # become a server socket, maximum 5 connections
         self.game = game
+        self.connections = []
 #        self.lock = threading.Lock()
 
         self.daemon = True
@@ -63,7 +63,7 @@ class Host(threading.Thread):
     def run(self):  #fixme
         while True:
             conn, address = self.s.accept()
-            self.game.data["players"].append(ClientConnection(self.game, conn))
+            self.connections.append(ClientConnection(self.game, conn))
             print("Client connected")
 #            self.sync()
 
