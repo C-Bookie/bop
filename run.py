@@ -2,8 +2,8 @@
 import math
 import time
 
-import game, director
-import server, user
+from backend import game, server
+from frontend import director, user
 
 hosting = True
 headless = False

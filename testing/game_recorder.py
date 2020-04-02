@@ -1,15 +1,15 @@
 
-from conductor import *
-from game import Game
-from director import Director
+from run import *
+from backend.game import Game
+from frontend.director import Director
 
-from user import User
+from frontend.user import User
 
 import pygame
 
 import json
 
-import mock_random
+from testing import mock_random
 
 
 class UserPlayback(User):

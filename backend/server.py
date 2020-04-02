@@ -2,7 +2,8 @@
 import socket
 import threading
 
-import game, connection
+import connection
+from backend import game
 
 global serversocket
 

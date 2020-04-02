@@ -1,7 +1,9 @@
 
 import socket
 
-import screen, connection
+import connection
+from frontend import screen
+
 
 class Director():
     def __init__(self, ip, game):

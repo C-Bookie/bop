@@ -1,15 +1,14 @@
 import unittest
 
-from conductor import *
-from game import Game
-from director import Director
+from run import *
+from backend.game import Game
+from frontend.director import Director
 
-import game_recorder
+from testing import game_recorder, mock_random
 
 import json
 import time
 
-import mock_random
 
 class MyTestCase(unittest.TestCase):
 	def setUp(self):
