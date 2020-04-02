@@ -2,8 +2,10 @@
 import math
 import time
 
-from backend import game, server
-from frontend import director, user
+from bop.backend.game import Game as Game
+from bop.backend.server import Host
+from bop.frontend.director import Director
+from bop.frontend.user import User, playerKeys
 
 hosting = True
 headless = False
@@ -38,7 +40,10 @@ def questionInt(msg):
         except ValueError:
             continue
 
-if __name__ == '__main__':
+def run():
+    global userControls
+    global ip
+
     print("///Bop\\\\\\")
 
     ##configuration
@@ -68,23 +73,23 @@ if __name__ == '__main__':
 
     ##initialization
 
-    game = game.Game([width, height], drag, size, speed, not hosting)
+    game = Game([width, height], drag, size, speed, not hosting)
 
     if hosting:
         print("Server starting")
-        host = server.Host(game)
+        host = Host(game)
         print("Server started")
     else:
         host = None
 
     if not headless:
         print("Client starting")
-        director = director.Director(ip, game)
+        director = Director(ip, game)
         for userControl in userControls:
             if userControl[0]:
-                director.newUser(user.User(controller=True, joystickID=userControl[1]))
+                director.newUser(User(controller=True, joystickID=userControl[1]))
             else:
-                director.newUser(user.User(controller=False, controls=user.playerKeys[userControl[1]]))
+                director.newUser(User(controller=False, controls=playerKeys[userControl[1]]))
         print("Client started")
     else:
         director = None
@@ -109,4 +114,5 @@ if __name__ == '__main__':
         if wait > 0:
             time.sleep(wait)
 
-
+if __name__ == '__main__':
+    run()

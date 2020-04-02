@@ -1,15 +1,11 @@
 
-from run import *
-from backend.game import Game
-from frontend.director import Director
-
-from frontend.user import User
+from bop.run import *
 
 import pygame
 
 import json
 
-from testing import mock_random
+from tests import mock_random
 
 
 class UserPlayback(User):
@@ -57,8 +53,8 @@ class Recorder:
 		self.recorded_input = []
 		self.recorded_output = []
 
-		self.game = Game(mock_random, [width, height], drag, size, speed, not hosting)
-		self.host = server.Host(self.game)
+		self.game = Game([width, height], drag, size, speed, not hosting, randomAPI=mock_random)
+		self.host = Host(self.game)
 		self.director = Director(ip, self.game)
 
 		self.user_recorder = UserRecorder()

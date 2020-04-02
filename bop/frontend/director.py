@@ -1,8 +1,8 @@
 
 import socket
 
-import connection
-from frontend import screen
+from bop import connection
+from bop.frontend import screen
 
 
 class Director():
