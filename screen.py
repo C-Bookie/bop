@@ -28,7 +28,7 @@ class Screen:
         pygame.font.init()
         self.font = pygame.font.SysFont('Comic Sans MS', 30)
 
-#        pygame.mixer.music.load('bop.wav')
+        # pygame.mixer.music.load('bop.wav')
 
     def addUser(self, user):
         self.users[user.id] = user
