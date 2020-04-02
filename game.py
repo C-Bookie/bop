@@ -2,7 +2,8 @@
 import random
 
 class Game:
-    def __init__(self, screenSize, drag, size, speed, frame=False):
+    def __init__(self, screenSize, drag, size, speed, frame=False, randomAPI=random):
+        self.random = randomAPI
         self.screenSize = screenSize
         self.drag = drag
         self.size= size
@@ -38,7 +39,7 @@ class Game:
             if not self.frame:
                 if self.overlapping(player, self.data["gold"]):
                     for i, j in enumerate(self.data["gold"].pos):
-                        self.data["gold"].pos[i] = random.randint(0, self.screenSize[i] - self.size)
+                        self.data["gold"].pos[i] = self.random.randint(0, self.screenSize[i] - self.size)
                     player.sco += 1
                     self.bop = True
 
@@ -54,8 +55,8 @@ class Game:
             self.pos = [0]*len(game.screenSize)
             self.vel = [0]*len(game.screenSize)
             for i, j in enumerate(game.screenSize):
-                self.pos[i] = random.randint(0, game.screenSize[i] - game.size)
-            self.col = (random.randint(128, 192), random.randint(128, 192), random.randint(0, 128))
+                self.pos[i] = self.game.random.randint(0, game.screenSize[i] - game.size)
+            self.col = (self.game.random.randint(128, 192), self.game.random.randint(128, 192), self.game.random.randint(0, 128))
 
         def list(self):
             return {
@@ -69,12 +70,15 @@ class Game:
             self.vel = l["vel"]
             self.col = l["col"]
 
+        def __str__(self):
+            return str(self.pos) + ", " + str(self.vel) + ", " + str(self.col)
+
     class Player(Entity):
         def __init__(self, game):
             super(Game.Player, self).__init__(game)
             self.act = [0]*len(game.screenSize)*2 #left, right, up, down
             self.sco = 0
-            self.col = (random.randint(128, 255), random.randint(128, 255), random.randint(128, 255))
+            self.col = (self.game.random.randint(128, 255), self.game.random.randint(128, 255), self.game.random.randint(128, 255))
 
         def list(self):
             result = super(Game.Player, self).list()
