@@ -9,13 +9,6 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="ctb25@raptor.kent.ac.uk:22">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
       <paths name="mendel@192.168.1.115:22">
         <serverdata>
           <mappings>
@@ -23,14 +16,7 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="pi@192.168.1.179:22">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="pi@192.168.1.240:22">
+      <paths name="pi@192.168.1.121:22">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />

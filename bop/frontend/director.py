@@ -62,7 +62,7 @@ class Director(caduceussocket.Client):
         self.data = data
 
     # exits game
-    def exitCom(self, _rec):
+    def exitCom(self):
         # global loop
         # loop = False
         self.close()

@@ -14,10 +14,6 @@ import time
 class MyTestCase(unittest.TestCase):
 	def setUp(self):
 		hosting = True
-		headless = False
-		players = 2
-		userControls = []
-		Bot = False
 
 		ip = "127.0.0.1"
 
@@ -27,20 +23,18 @@ class MyTestCase(unittest.TestCase):
 		size = 4
 		speed = math.ceil(((1 - drag) * size) / 1000)  # fixme
 
-		fps = 60
-		gap = 1 / fps
 
 		sm = SessionManager()
 		sm.start()
 
-		self.game = Game([width, height], drag, size, speed, not hosting)
+		self.game = Game([width, height], drag, size, speed, not hosting, mock_random)
 		self.host = GameServer(self.game, ip)
 		self.host.start()
 		self.director = Director(ip)
 		self.director.start()
 
 	def test_1(self):
-		assert __version__ == '0.1.3'
+		assert __version__ == '0.1.4'
 
 		with open('test1.json') as json_file:
 			recorded = json.load(json_file)

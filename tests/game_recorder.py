@@ -12,6 +12,7 @@ from tests import mock_random
 
 class UserPlayback(User):
 	def __init__(self, record):
+		super().__init__()
 		self.id = -1
 		self.controller = True
 		self.joystick = self.Joystick()
@@ -56,10 +57,6 @@ class Recorder:
 		self.recorded_output = []
 
 		hosting = True
-		headless = False
-		players = 2
-		userControls = []
-		Bot = False
 
 		ip = "127.0.0.1"
 
@@ -75,7 +72,7 @@ class Recorder:
 		sm = SessionManager()
 		sm.start()
 
-		self.game = Game([width, height], drag, size, speed, not hosting)
+		self.game = Game([width, height], drag, size, speed, not hosting, mock_random)
 		self.host = GameServer(self.game, ip)
 		self.host.start()
 		self.director = Director(ip)
@@ -101,7 +98,7 @@ class Recorder:
 			self.user_recorder.next()
 			self.game.loop()
 			self.host.tick()
-			self.director.loop()
+			self.director.sync()
 
 			self.recorded_input.append(self.user_recorder.joystick.values)
 			self.recorded_output.append(encoder.encode(self.game.data))
@@ -119,6 +116,9 @@ class Recorder:
 
 		with open(file_path, 'w') as outfile:
 			json.dump(recorded, outfile)
+
+		# self.director.exitCom()
+		# self.host.exitCom()
 
 
 if __name__ == "__main__":
