@@ -1,23 +1,26 @@
+"""game logic"""
 
 import random
 
 class Game:
-    def __init__(self, screenSize, drag, size, speed, frame=False, randomAPI=random):
-        self.random = randomAPI
-        self.screenSize = screenSize
-        self.drag = drag
-        self.size = size
-        self.speed = speed
-        self.bop = False
+    def __init__(self, screen_size, drag, size, speed, frame=False, random_api=random):
+        self.random = random_api
+        self.screenSize = screen_size
+        self.drag = drag  # physical drag on a player
+        self.size = size  # size of a player
+        self.speed = speed  # speed of a player
+        self.bop = False  # enable sound
         self.data = {
             "players": {},
             "gold": self.Entity(self)
         }
         self.frame = frame
 
-    def addPlayer(self, id):
-        self.data["players"][id] = self.Player(self)
+    #  adds a playerID to the game data
+    def add_player(self, player_id):
+        self.data["players"][player_id] = self.Player(self)
 
+    # main game loop for physics engine
     def loop(self):
         for i in self.data["players"]:
             player = self.data["players"][i]
@@ -43,6 +46,7 @@ class Game:
                     player.sco += 1
                     self.bop = True
 
+    #  detects if two enteritis are overlapping
     def overlapping(self, e1, e2):
         result = True
         for i, j in enumerate(e1.pos):
@@ -57,6 +61,7 @@ class Game:
                 self.pos[i] = game.random.randint(0, game.screenSize[i] - game.size)
             self.col = (game.random.randint(128, 192), game.random.randint(128, 192), game.random.randint(0, 128))
 
+        #  pickle
         def list(self):
             return {
                 "pos": self.pos,
@@ -64,6 +69,7 @@ class Game:
                 "col": self.col,
             }
 
+        # unpickle
         def deList(self, l):
             self.pos = l["pos"]
             self.vel = l["vel"]

@@ -1,3 +1,4 @@
+"""screen(GUI)"""
 
 import sys
 

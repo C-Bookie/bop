@@ -1,3 +1,4 @@
+"""mocking library for reproducible results"""
 
 class Random:
 	def __init__(self):

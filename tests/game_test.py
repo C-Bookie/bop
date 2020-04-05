@@ -1,3 +1,5 @@
+"""controller/keyboard handling playback and comparison"""
+
 import unittest
 
 from bop.run import *
@@ -11,12 +13,34 @@ import time
 
 class MyTestCase(unittest.TestCase):
 	def setUp(self):
-		self.game = Game([width, height], drag, size, speed, not hosting, randomAPI=mock_random)
-		self.host = Host(self.game)
-		self.director = Director(ip, self.game)
+		hosting = True
+		headless = False
+		players = 2
+		userControls = []
+		Bot = False
+
+		ip = "127.0.0.1"
+
+		width = 400
+		height = 300
+		drag = 0.90
+		size = 4
+		speed = math.ceil(((1 - drag) * size) / 1000)  # fixme
+
+		fps = 60
+		gap = 1 / fps
+
+		sm = SessionManager()
+		sm.start()
+
+		self.game = Game([width, height], drag, size, speed, not hosting)
+		self.host = GameServer(self.game, ip)
+		self.host.start()
+		self.director = Director(ip)
+		self.director.start()
 
 	def test_1(self):
-		assert __version__ == '0.1.2'
+		assert __version__ == '0.1.3'
 
 		with open('test1.json') as json_file:
 			recorded = json.load(json_file)
@@ -34,9 +58,8 @@ class MyTestCase(unittest.TestCase):
 
 		for output in recorded["output"]:
 			self.user_playback.next()
-			self.game.loop()
-			self.host.sync()
-			self.director.loop()
+			self.host.tick()
+			self.director.sync()
 
 			self.assertEqual(output, encoder.encode(self.game.data))
 

@@ -1,3 +1,5 @@
+"""controller/keyboard recording for unit testing"""
+
 
 from bop.run import *
 
@@ -53,9 +55,31 @@ class Recorder:
 		self.recorded_input = []
 		self.recorded_output = []
 
-		self.game = Game([width, height], drag, size, speed, not hosting, randomAPI=mock_random)
-		self.host = Host(self.game)
-		self.director = Director(ip, self.game)
+		hosting = True
+		headless = False
+		players = 2
+		userControls = []
+		Bot = False
+
+		ip = "127.0.0.1"
+
+		width = 400
+		height = 300
+		drag = 0.90
+		size = 4
+		speed = math.ceil(((1 - drag) * size) / 1000)  # fixme
+
+		fps = 60
+		self.gap = 1 / fps
+
+		sm = SessionManager()
+		sm.start()
+
+		self.game = Game([width, height], drag, size, speed, not hosting)
+		self.host = GameServer(self.game, ip)
+		self.host.start()
+		self.director = Director(ip)
+		self.director.start()
 
 		self.user_recorder = UserRecorder()
 		self.director.newUser(self.user_recorder)
@@ -76,14 +100,14 @@ class Recorder:
 		for _frame in range(frames):
 			self.user_recorder.next()
 			self.game.loop()
-			self.host.sync()
+			self.host.tick()
 			self.director.loop()
 
 			self.recorded_input.append(self.user_recorder.joystick.values)
 			self.recorded_output.append(encoder.encode(self.game.data))
 
 			now = time.time()
-			wait = (lastCheck + gap) - now
+			wait = (lastCheck + self.gap) - now
 			lastCheck = now
 			if wait > 0:
 				time.sleep(wait)

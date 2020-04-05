@@ -1,3 +1,4 @@
+"""controller/keyboard handling"""
 
 import pygame
 from pygame.locals import *
