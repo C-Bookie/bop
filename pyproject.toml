@@ -12,6 +12,7 @@ keywords = ['sosket', 'testing']
 [tool.poetry.dependencies]
 python = "^3.7"
 pygame = "^1.9.6"
+caduceussocket = "^0.1.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

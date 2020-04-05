@@ -22,6 +22,14 @@ docs = ["sphinx", "zope.interface"]
 tests = ["coverage", "hypothesis", "pympler", "pytest (>=4.3.0)", "six", "zope.interface"]
 
 [[package]]
+category = "main"
+description = "A python socket manager."
+name = "caduceussocket"
+optional = false
+python-versions = ">=3.7,<4.0"
+version = "0.1.1"
+
+[[package]]
 category = "dev"
 description = "Cross-platform colored terminal text."
 marker = "sys_platform == \"win32\""
@@ -162,7 +170,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "d3ea5d7acb11175d163fd3b724b6c4dd184945dc30127ccd7394afcd0be71c17"
+content-hash = "2d135d3fdb5a834bcc5e3ceacac1d417c4238b5b0e0e47ea6fb717857be12459"
 python-versions = "^3.7"
 
 [metadata.files]
@@ -173,6 +181,10 @@ atomicwrites = [
 attrs = [
     {file = "attrs-19.3.0-py2.py3-none-any.whl", hash = "sha256:08a96c641c3a74e44eb59afb61a24f2cb9f4d7188748e76ba4bb5edfa3cb7d1c"},
     {file = "attrs-19.3.0.tar.gz", hash = "sha256:f7b7ce16570fe9965acd6d30101a28f62fb4a7f9e926b3bbc9b61f8b04247e72"},
+]
+caduceussocket = [
+    {file = "caduceusSocket-0.1.1-py3-none-any.whl", hash = "sha256:5f564c8a07b88638c5b31612216188b9feb5c24a26b863d6e21d1528293fc463"},
+    {file = "caduceussocket-0.1.1.tar.gz", hash = "sha256:70a68a59bab85442d3aef5021ef5d61069889d75b761a31869d69430babb47dc"},
 ]
 colorama = [
     {file = "colorama-0.4.3-py2.py3-none-any.whl", hash = "sha256:7d73d2a99753107a36ac6b455ee49046802e59d9d076ef8e47b61499fa29afff"},

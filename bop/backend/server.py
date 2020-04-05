@@ -1,77 +1,74 @@
 
-import socket
-import threading
+import caduceussocket
 
-from bop import connection
-from bop.backend import game
 
-global serversocket
-
-width = 400
-height = 300
-
-fps = 60
-gap = 1 / fps
-
-drag = 0.4578
-size = 10
-
-loop = True
-
-class ClientConnection():
-    def __init__(self, game, conn):
+class GameServer(caduceussocket.Client):
+    def __init__(self, game):
+        super().__init__()
         self.game = game
 
-        self.connection = connection.Connection(conn)
+        self.white_list_functions += [
+            "keysCom",
+            "newIDCom",
+            "exitCom",
+            "newScreen"
+        ]
 
-        self.connection.setListener("keys", self.keysCom)
-        #self.connection.setListener("exit", self.exitCom)
-        self.connection.setListener("newID", self.newIDCom)
+    def connect(self):
+        super().connect()
+        self.send_data({
+            "type": "register",
+            "args": [
+                "server",
+                "game1"
+            ]
+        })
 
-    def newIDCom(self, _rec):
+    def newIDCom(self):
         newId = 0
         while newId in self.game.data["players"]:
             newId += 1
-        self.game.data["players"][newId] = game.Game.Player(self.game)  #fixme
-        self.connection.send_set({
-            "com":"id",
-            "id":newId
+        self.game.addPlayer(newId)
+        self.toPlayers({
+            "type": "freshID",
+            "args": [
+                newId
+            ]
         })
 
-    def keysCom(self, rec):
-        self.game.data["players"][rec["id"]].act = rec["key"]
+    def newScreen(self):
+        self.toPlayers({
+            "type": "setup",
+            "args": [
+                self.game.data,
+                self.game.screenSize,
+                self.game.size,
+                self.game.bop
+            ]
+        })
 
-    def exitCom(self, _rec):
-        global loop
-        loop = False
-        self.connection.close()
+    def keysCom(self, player_id, key):
+        id = int(player_id)  # fixme JSON converting int keys to string
+        self.game.data["players"][id].act = key
 
+    def exitCom(self):
+        self.conn.close()
 
+    def tick(self):
+        self.game.loop()
+        self.toPlayers({
+            "type": "dataCom",
+            "args": [
+                self.game.data
+            ]
+        })
 
-class Host(threading.Thread):
-    def __init__(self, game):
-        super(Host, self).__init__()
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.bind(('127.0.0.1', 8089))
-        self.s.listen(5)  # become a server socket, maximum 5 connections
-        self.game = game
-        self.connections = []
-
-        self.daemon = True
-        self.start()
-
-    def run(self):
-        while True:
-            conn, address = self.s.accept()
-            self.connections.append(ClientConnection(self.game, conn))
-            print("Client connected")
-
-    def sync(self):
-        for client in self.connections:
-            client.connection.send_set({
-                "com":"data",
-                "data":self.game.data
-            })
-
-
+    def toPlayers(self, msg):
+        self.send_data({
+            "type": "broadcast",
+            "args": [
+                msg,
+                "player"
+            ]
+        })
 

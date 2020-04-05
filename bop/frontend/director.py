@@ -1,66 +1,99 @@
 
-import socket
-
-from bop import connection
+import caduceussocket
 from bop.frontend import screen
 
 
-class Director():
-    def __init__(self, ip, game):
-        conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        conn.connect((ip, 8089))
-        self.connection = connection.Connection(conn)
-
-        self.game = game
-        self.screen = screen.Screen(self.game)
+class Director(caduceussocket.Client):
+    def __init__(self):
+        super().__init__()
         self.users = []
 
-        self.connection.setListener("data", self.dataCom)
-#        self.connection.setListener("exit", self.exitCom)
-        self.connection.setListener("id", self.freshID)
+        self.screen = screen.Screen()
+
+        self.white_list_functions += [
+            "dataCom",
+            "freshID",
+            "setup",
+            "exitCom"
+        ]
+
+    def connect(self):
+        super().connect()
+        self.send_data({
+            "type": "register",
+            "args": [
+                "player",
+                "game1"
+            ]
+        })
+        self.toServer({"type": "newScreen"})
+
+    def setup(self, data, screenSize, size, bop):
+        if not self.screen.ready:
+            self.data = data
+            self.screenSize = screenSize
+            self.size = size
+            self.bop = bop
+
+            self.screen.setup(self.screenSize, self.size, self.bop)
 
     def newUser(self, user):
         self.users.append(user)
-        temp = {"com": "newID"}
-        self.connection.send_set(temp)
+        self.toServer({"type": "newIDCom"})
 
-    def freshID(self, rec):
+    def freshID(self, player_id):
         for user in self.users:
             if user.id == -1:
-                user.id = rec["id"]
+                user.id = player_id
                 self.screen.addUser(user)
-                self.game.addPlayer(user.id)
+                # self.game.addPlayer(user.id)
+                # self.data["players"][user.id] = self.game.Player(self.random, self.screenSize, self.size)
                 return
         raise Exception
 
-    def dataCom(self, rec):
-        self.game.data["gold"].deList(rec["data"]["gold"])  #sync the gold
+    def dataCom(self, data):
+        self.data = data
 
-        for j in rec["data"]["players"]:    #adding online players
-            i = int(j)
-            if i not in self.game.data["players"]:
-                self.game.data["players"][i] = self.game.Player(self.game)
-            self.game.data["players"][i].deList(rec["data"]["players"][j])
-
-        for j in list(self.game.data["players"]):   #removing online players
-            if str(j) not in rec["data"]["players"]:    #todo replace str(j) with int(j)
-                self.game.data["players"].pop(j)
+        # self.data["gold"].deList(data["gold"])  #sync the gold
+        #
+        # for j in data["players"]:    #adding online players
+        #     i = int(j)
+        #     if i not in self.data["players"]:
+        #         self.data["players"][i] = self.game.Player(self.game)
+        #     self.data["players"][i].deList(data["players"][j])
+        #
+        # for j in list(self.data["players"]):   #removing online players
+        #     if str(j) not in data["players"]:    #todo replace str(j) with int(j)
+        #         self.data["players"].pop(j)
 
     def exitCom(self, _rec):
-        global loop
-        loop = False
-        self.connection.conn.close()
+        # global loop
+        # loop = False
+        self.close()
 
-    def loop(self):
-        self.screen.loop()
+    def sync(self):
+        if self.screen.ready:
+            self.data = self.screen.loop(self.data)
 
-        for user in self.users:
-            if user.id != -1:
-                self.connection.send_set({
-                    "com": "keys",
-                    "id": user.id,
-                    "key": self.game.data["players"][user.id].act
-                })
+            for user in self.users:
+                id = str(user.id)  # fixme JSON converting int keys to string
+                if id in self.data["players"]:
+                    self.toServer({
+                        "type": "keysCom",
+                        "args": [
+                            id,
+                            self.data["players"][id]["act"]
+                        ]
+                    })
+
+    def toServer(self, msg):
+        self.send_data({
+            "type": "broadcast",
+            "args": [
+                msg,
+                "server"
+            ]
+        })
 
 
 

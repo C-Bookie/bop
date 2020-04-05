@@ -3,9 +3,11 @@ import math
 import time
 
 from bop.backend.game import Game as Game
-from bop.backend.server import Host
+from bop.backend.server import GameServer
 from bop.frontend.director import Director
 from bop.frontend.user import User, playerKeys
+
+from caduceussocket import SessionManager
 
 hosting = True
 headless = False
@@ -73,23 +75,29 @@ def run():
 
     ##initialization
 
-    game = Game([width, height], drag, size, speed, not hosting)
+
 
     if hosting:
         print("Server starting")
-        host = Host(game)
+        sm = SessionManager()
+        sm.start()
+
+        game = Game([width, height], drag, size, speed, not hosting)
+        host = GameServer(game)
+        host.start()
         print("Server started")
     else:
         host = None
 
     if not headless:
         print("Client starting")
-        director = Director(ip, game)
+        director = Director()
         for userControl in userControls:
             if userControl[0]:
                 director.newUser(User(controller=True, joystickID=userControl[1]))
             else:
                 director.newUser(User(controller=False, controls=playerKeys[userControl[1]]))
+        director.start()
         print("Client started")
     else:
         director = None
@@ -100,13 +108,11 @@ def run():
 
     loop = True
     while loop:
-        game.loop()
-
         if hosting:
-            host.sync()
+            host.tick()
 
         if not headless:
-            director.loop()
+            director.sync()
 
         now = time.time()
         wait = (lastCheck + gap) - now
